@@ -5,9 +5,13 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using HelixToolkit.SharpDX.Core;
 using ReactiveUI;
+using Splat;
 using Syncfusion.UI.Xaml.TreeGrid;
 using WolvenKit.App.Services;
 using WolvenKit.App.ViewModels.Documents;
+using WolvenKit.App.ViewModels.Shell;
+using WolvenKit.Core.Interfaces;
+using WolvenKit.Helpers;
 using WolvenKit.RED4.Types;
 
 namespace WolvenKit.Views.Documents
@@ -22,6 +26,11 @@ namespace WolvenKit.Views.Documents
         public RDTMeshView()
         {
             InitializeComponent();
+            ProtonRendererCompatibility.ConfigureViewport(hxViewport, Locator.Current.GetService<AppViewModel>());
+
+            hxViewport.RenderExceptionOccurred += (_, args) =>
+                Locator.Current.GetService<ILoggerService>()?.Error(
+                    $"Document mesh preview render failure: {args.Exception}");
 
             //hxViewport.DXSceneInitialized += delegate (object sender, EventArgs args)
             //{

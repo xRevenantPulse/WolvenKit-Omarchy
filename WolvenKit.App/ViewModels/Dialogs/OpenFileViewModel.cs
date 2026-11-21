@@ -44,23 +44,22 @@ public class OpenFileViewModel : DialogViewModel
 
         var openFileDialog = new OpenFileDialog { Filter = Filter, Title = Title };
 
-        if (openFileDialog.ShowDialog() == true)
-        {
-            FileName = openFileDialog.FileName;
-        }
-
-        if (openFileDialog.FileName is not string filePath)
+        if (ShowFileDialog(openFileDialog) != true || string.IsNullOrWhiteSpace(openFileDialog.FileName))
         {
             _loggerService.Info("No file selected.");
             return null;
         }
 
+        var filePath = openFileDialog.FileName;
+        FileName = filePath;
         var fileName = Path.GetFileName(filePath);
 
         var wasCopied = await CopyFile(filePath, fileName);
 
         return wasCopied ? fileName : null;
     }
+
+    protected virtual bool? ShowFileDialog(OpenFileDialog dialog) => dialog.ShowDialog();
 
     private async Task<bool> CopyFile(string filePath, string fileName)
     {

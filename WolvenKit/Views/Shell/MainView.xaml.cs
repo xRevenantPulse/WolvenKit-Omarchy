@@ -16,6 +16,7 @@ using WolvenKit.App.ViewModels.Dialogs;
 using WolvenKit.App.ViewModels.Shell;
 using WolvenKit.App.ViewModels.Tools;
 using WolvenKit.Common.Services;
+using WolvenKit.Helpers;
 using WolvenKit.Views.Dialogs;
 using WolvenKit.Views.Dialogs.Windows;
 using WolvenKit.Views.Templates;
@@ -38,6 +39,7 @@ namespace WolvenKit.Views.Shell
         public MainView(ProjectResourceTools projectResourceTools, AppViewModel viewModel = null)
         {
             InitializeComponent();
+            ProtonRendererCompatibility.ConfigureWindow(this);
             Syncfusion.UI.Xaml.Grid.AutomationPeerHelper.EnableCodedUI = true;
 
             ViewModel = viewModel ?? Locator.Current.GetService<AppViewModel>();

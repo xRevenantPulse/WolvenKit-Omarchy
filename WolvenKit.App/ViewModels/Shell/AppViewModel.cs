@@ -2095,6 +2095,7 @@ public partial class AppViewModel : ObservableObject/*, IAppViewModel*/
     [NotifyCanExecuteChangedFor(nameof(CloseDialogCommand))]
     [NotifyCanExecuteChangedFor(nameof(AddAXlItemFilesCommand))]
     [NotifyCanExecuteChangedFor(nameof(AddOrEditRadioCommand))]
+    [NotifyCanExecuteChangedFor(nameof(ImportArchiveCommand))]
     private bool _isDialogShown;
 
     [ObservableProperty]
@@ -2126,6 +2127,7 @@ public partial class AppViewModel : ObservableObject/*, IAppViewModel*/
     [NotifyCanExecuteChangedFor(nameof(GenerateInkatlasCommand))]
     [NotifyCanExecuteChangedFor(nameof(AddAXlItemFilesCommand))]
     [NotifyCanExecuteChangedFor(nameof(AddOrEditRadioCommand))]
+    [NotifyCanExecuteChangedFor(nameof(ImportArchiveCommand))]
     private Cp77Project? _activeProject;
 
     [ObservableProperty]

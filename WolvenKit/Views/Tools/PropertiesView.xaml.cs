@@ -5,7 +5,10 @@ using HelixToolkit.Wpf.SharpDX;
 using ReactiveUI;
 using Splat;
 using Syncfusion.Windows.PropertyGrid;
+using WolvenKit.App.ViewModels.Shell;
 using WolvenKit.App.ViewModels.Tools;
+using WolvenKit.Core.Interfaces;
+using WolvenKit.Helpers;
 
 namespace WolvenKit.Views.Tools
 {
@@ -19,6 +22,11 @@ namespace WolvenKit.Views.Tools
         public PropertiesView()
         {
             InitializeComponent();
+            ProtonRendererCompatibility.ConfigureViewport(hxViewport, Locator.Current.GetService<AppViewModel>());
+
+            hxViewport.RenderExceptionOccurred += (_, args) =>
+                Locator.Current.GetService<ILoggerService>()?.Error(
+                    $"Quick mesh preview render failure: {args.Exception}");
 
             ViewModel = Locator.Current.GetService<PropertiesViewModel>();
             DataContext = ViewModel;

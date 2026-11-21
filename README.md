@@ -1,118 +1,82 @@
-<p align="center">
-  <a href="https://wiki.redmodding.org/wolvenkit"><img src="https://user-images.githubusercontent.com/65016231/191120204-c8e08bb2-d68b-4919-91ec-f8c1aaef1e6a.png"/></a><br /><br />
-</p>
+# WolvenKit - Omarchy
 
-![GitHub Release Date](https://img.shields.io/github/release-date/WolvenKit/WolvenKit)
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/WolvenKit/WolvenKit/check-only.yml)
-![GitHub all releases](https://img.shields.io/github/downloads/WolvenKit/WolvenKit/total)
-![GitHub issues](https://img.shields.io/github/issues/WolvenKit/WolvenKit)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/m/WolvenKit/WolvenKit)
-<a href="https://discord.gg/Epkq79kd96"><img src="https://img.shields.io/discord/717692382849663036.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2"></a>
+An unofficial, Omarchy-focused fork of [WolvenKit](https://github.com/WolvenKit/WolvenKit) for Cyberpunk 2077 modding.
 
-> ⚠️ This repository focuses on REDengine 4 for Cyberpunk 2077. For WolvenKit for <em>The Witcher 3: Wild Hunt</em> please see: https://github.com/WolvenKit/WolvenKit-7
+I maintain this fork to keep a tested WolvenKit setup working on my Omarchy desktop and to review upstream changes before adopting them. Omarchy is based on Arch Linux, but this is not a claim that the fork works on every Arch installation or Linux distribution.
 
-WolvenKit is an open-source modding tool for <em>Cyberpunk 2077</em>. Our vision is to develop a standalone software which is capable of reading and writing all REDengine file formats. Additionally the WolvenKit application is designed to simplify and accelerate modding workflows.
-This repository was created to demonstrate how <a href="https://en.wikipedia.org/wiki/CD_Projekt">CDPR</a>'s proprietary <a href="https://en.wikipedia.org/wiki/CD_Projekt#REDengine"><strong>REDengine</strong></a> reads and writes file formats.
+The GUI is still the Windows WPF application running through Steam and Proton. This is not a native Linux port.
 
-This toolkit is being made solely for research and educational purposes, and the dev team is in no way responsible for any malfunctions that occur from its use.
-It's completely open source, licensed under the <a href="https://github.com/WolvenKit/WolvenKit/blob/main/LICENSE">GPL-3.0</a>, and in no way is it made to generate revenue.
+## Original project
 
----
+WolvenKit and its contributors built the original editor. This fork keeps their source history, credits and GPL-3.0 license.
 
-<h3 align="center">
-  <a href="#installation">Installation</a> •
-  <a href="#usage">Usage</a> •
-  <a href="#contributing">Contributing</a> •
-  <a href="#screenshots">Screenshots</a> •
-  <a href="#credits">Credits</a> •
-  <a href="#license">License</a>
-</h3>
+- [Original source code](https://github.com/WolvenKit/WolvenKit)
+- [REDModding project website](http://redmodding.org/)
+- [WolvenKit wiki](https://wiki.redmodding.org/wolvenkit)
+- [Upstream download and Linux setup guide](https://wiki.redmodding.org/wolvenkit/getting-started/download)
+- [Original README and credits](README.upstream.md)
 
-## Installation
+This fork is not affiliated with or endorsed by the WolvenKit or Omarchy teams. Fork-specific compatibility reports belong here rather than being presented to upstream as failures of an unmodified release.
 
-Wolvenkit requires the latest .NET 10.0 runtime:
+## What changed
 
-1. Go to [Microsoft's .NET download page](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
-2. Find the ".NET Desktop Runtime 10.0.x" section and download the installer for your architecture (x64)
-3. Run the downloaded installer
+The Omarchy compatibility mode is enabled only when `WOLVENKIT_PROTON_COMPAT=1` is present in the Windows process environment. It leaves the normal rendering path unchanged without that opt-in.
 
-----------
+The mode uses an opaque main window, software WPF composition, native swapchain presentation and a precomputed viewcube texture. It also hides native preview surfaces behind embedded dialogs and requests a fresh frame when those surfaces become visible again. WPF composition and the GPU scene renderer are separate parts of this setup.
 
-There are multiple ways to install Wolvenkit:
+Other changes correct archive-import command notifications, handle canceled or empty file selections before any copy/delete, and add contextual render-error logging. The logging does not suppress exceptions or claim that a failed renderer loaded successfully.
 
-### Portable or Installer
+These source changes do not install fonts or Microsoft's shader compiler. The tested editor prefix also uses a native `d3dcompiler_47` override and Liberation font substitutes. Those prerequisites still need to be configured for a new installation.
 
-Download either the latest stable version or the current nightly (beta) version from here:
+## Tested scope
 
-| Package | Latest Release | Checks  |
-| ------- | ------------ | ----------------- |
-| [WolvenKit Nightly](https://github.com/WolvenKit/WolvenKit-nightly-releases/releases/latest) | [![GitHub release (latest by date)](https://img.shields.io/github/v/release/WolvenKit/WolvenKit-nightly-releases)](https://github.com/WolvenKit/WolvenKit-nightly-releases/releases/latest) | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/WolvenKit/WolvenKit/nightly.yml) |
-| [WolvenKit](https://github.com/WolvenKit/WolvenKit/releases/latest) | [![GitHub release (latest by date)](https://img.shields.io/github/v/release/WolvenKit/WolvenKit)](https://github.com/WolvenKit/WolvenKit/releases/latest) | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/WolvenKit/WolvenKit/check-only.yml) |
+The current source is based on WolvenKit main at `c6065b22f70cb0a53913f5440d112ab1b7dd00a4`, which declares 10.0.0-beta.2.
 
-To install the app quickly download `WolvenKitSetup-x.x.x.exe` and double click to run the installer.
+Validation used one Omarchy/Hyprland setup with NVIDIA graphics, Steam Proton Experimental and a separate editor prefix. It covered:
 
-You can also simply download `WolvenKit-x.x.x.x.zip` and extract it to a location of your choice
+- Real geometry in both the quick mesh panel and document Mesh Preview, including camera rotation and zoom.
+- Dialog dismissal and tab switching with automatic preview repaint.
+- Archive-command state transitions and clean picker cancellation.
+- Regular and bold physical font resolution using substitutes.
+- GLB export, import into native Blender, mesh re-import and reopening.
+- Archive packing, byte-exact extraction and ZIP checks in a disposable project.
 
-## Usage
+The focused command, picker and renderer tests ran under Proton. The complete test project compiled, but the full repository suite was not executed. This is local validation, not a cross-distro certification or a long-session stability guarantee.
 
-📑 Check out the wiki: https://wiki.redmodding.org/wolvenkit
+## Setup and builds
 
-## Build instructions
+This repository contains the fork's source changes. A fork-specific binary release or one-command installer has not been published yet. An upstream portable download will not automatically include these changes.
 
-If you want to build the app from source yourself:
+Use a matching Windows x64 build and an editor-only Steam/Proton prefix. Keep that prefix separate from Cyberpunk's prefix, and back up projects and the editor configuration before changing either.
 
-1. Download and install [Visual Studio 2022 Community Edition](https://www.visualstudio.com/) or a higher version.
-2. Clone this repository.
-3. Open the solution (`All.sln`)
-4. Build the projects.
+The compatibility flag can be supplied in the WolvenKit Steam shortcut's launch options:
 
-## Contributing
-- Join the [Cyberpunk 2077 Modding Server](https://discord.gg/Epkq79kd96) for active development
+```text
+WOLVENKIT_PROTON_COMPAT=1 %command%
+```
 
-Do you want to contribute? Community feedback and contributions are highly appreciated!
-It's a good idea to create an issue when implementing a feature so people don't work on the same feature/issue in an asynchronous manner.
+It can also be stored in that editor prefix's `HKCU\Environment`. Use one explicit configuration method and verify that the Windows application receives it.
 
-**For general rules and guidelines see [CONTRIBUTING.md](/docs/CONTRIBUTING.md).**
+Enabling the flag alone is not the whole setup. The tested shader-compiler override, available fonts, graphics stack and runtime dependencies also matter. Do not install dependencies into the game's prefix to repair the editor.
 
-For any questions:
-Developer | Role | Email
------------- | ------------- | -------------
-[spirit (sprt_)](https://github.com/notaspirit) | Project Lead / Core Development |
-[Traderain](https://github.com/Traderain) | Project Lead | [Email](mailto:hambalko.bence@gmail.com)
+The repository retains the upstream build structure and SDK pin. Linux cross-building is possible, but the validation build required a private SDK override, a compiler-property override and resource filename-case workarounds. Until those steps are packaged and tested here, use the original build instructions in [README.upstream.md](README.upstream.md) rather than treating this as a ready-made native Arch build.
 
-## Screenshots
+Check third-party dependency licenses before building or redistributing binaries. The fork-specific changes do not add Microsoft shader-compiler DLLs, game DLLs, game assets, prefix backups or private audit logs.
 
-![WK 8 6 Home Page Example](https://user-images.githubusercontent.com/65016231/172458777-d521aeaa-b2fb-43ef-a909-3786c1b8bf02.png)
+## Known limitations
 
-![WK 8 6 Editor Example](https://user-images.githubusercontent.com/65016231/172455912-e1d4fe29-9ab6-45a1-9e0c-17f2bb47c447.png)
+- Script and template update requests timed out in the tested environment.
+- Native viewport right-click menus did not open in the tested swapchain path.
+- Fully textured materials, every entity/sector workflow, floating/docking and image export are not certified.
+- One earlier laboratory process exit remains unexplained. Later controlled runs closed normally, but they do not establish the cause of that exit.
+- Other GPU stacks, desktop sessions, Proton versions and Arch/Linux distributions remain untested.
 
-## Credits
+## Upstream updates
 
-WolvenKit is a direct result of the hard work and continuous support, financial and otherwise, of the many researchers, programmers, artists, contributors, and companies that have helped with this project. Without their outstanding work and generous support, we never would have been able to create WolvenKit for Cyberpunk 2077. A very special thank you goes out to...
+`origin` is this fork. `upstream` is the original WolvenKit repository. I fetch and review upstream changes on a separate branch, run the relevant tests, and merge only the changes I intend to maintain. There is no automatic upstream sync or merge policy.
 
-<img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.png" alt="JetBrains logo." height="64">
-
-- [JetBrains](https://www.jetbrains.com) who supplied open source licences for our developers
-- [Syncfusion](https://www.syncfusion.com/company/about-us) who supplied an open source licence for the WPF controls we use
-- [Ab3d PowerToys](https://www.ab4d.com/PowerToys.aspx)
-- [Ab3d DXEngine](https://www.ab4d.com/DXEngine.aspx)
-
-An ancestor to this tool was <a href="https://drive.google.com/file/d/0B3axqSlhNHOOYmpkWk83TXRkZmM/view">W3Edit</a>, initially developed by <a href="https://forums.cdprojektred.com/forum/en/the-witcher-series/the-witcher-3-wild-hunt/mod-discussions/58758-mod-editor">Sarcen</a> in 2015, around the time The Witcher 3 first came out. After Sarcen stopped working on it, a few of us picked it up and continued from there.
-
-- [Assimp](https://github.com/assimp/assimp-net)
-- [Zenhax](https://zenhax.com)
-- [Xentax](https://xentax.com)
-- [Lua Utils for W3](https://github.com/hhrhhr/Lua-utils-for-Witcher-3)
-- [TW3 Booster](https://github.com/gamebooster/witcher3-booster)
-- [TW3 Converter](https://bitbucket.org/jlouis/witcherconverter)
-- [VgmToolbox](https://sourceforge.net/projects/vgmtoolbox/)
-- [TW3 Mod Discussion](http://forums.cdprojektred.com/forum/en/the-witcher-series/the-witcher-3-wild-hunt/mod-discussions)
-- [Payday 2 Modding Information](https://bitbucket.org/zabb65/payday-2-modding-information)
-- [ModWorkshop](https://modworkshop.net/showthread.php?tid=101)
-- [W3 SaveGame Editor](https://github.com/Atvaark/W3SavegameEditor)
-- [ffmpeg](https://www.ffmpeg.org/)
-- [irrlicht](http://irrlicht.sourceforge.net/)
+Inherited GitHub Actions remain disabled initially while their build, release and synchronization behavior is reviewed. Existing application update links and services still originate upstream, so do not use an upstream app replacement as a fork upgrade. It can remove the local compatibility changes.
 
 ## License
 
-***Copyright Disclaimer:*** Under Section 107 of the Copyright Act 1976, allowance is made for "fair use" for purposes such as criticism, comment, news reporting, teaching, scholarship, and research. Fair use is permitted by copyright statute that might otherwise be infringing. Non-profit, educational or personal use tips the balance in favor of fair use.. This project is solely made for research and in no way made to generate any revenue.
+[GNU General Public License v3.0](LICENSE), retained from WolvenKit. Existing copyright notices, upstream history and third-party license terms remain in place. The original project and contributor credits are preserved in [README.upstream.md](README.upstream.md).

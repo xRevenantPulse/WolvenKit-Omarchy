@@ -9,6 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Test the production helper without booting the GUI's application/DI graph. -->
+    <Compile Include="..\..\WolvenKit\Helpers\ProtonRendererCompatibility.cs" Link="Views\ProtonRendererCompatibility.cs" />
+    <EmbeddedResource Include="..\..\WolvenKit\Resources\Proton\viewcube-labels.png" LogicalName="WolvenKit.Proton.ViewCube.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Resources\1_oodle.kark" />
     <None Remove="Resources\2_oodle.kark" />
     <None Remove="Resources\3_oodle.kark" />

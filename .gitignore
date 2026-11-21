@@ -293,3 +293,6 @@ Libs/Irrlicht.dll
 WolvenKit.IrrlichtLime/Release-x86
 msbuild.binlog
 !texconv.pdb
+
+# Private validation data and dependency caches
+/.audit-evidence/

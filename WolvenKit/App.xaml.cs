@@ -47,6 +47,8 @@ namespace WolvenKit
         // Constructor #2
         public AppImpl()
         {
+            ProtonRendererCompatibility.ApplyProcessSettings();
+
             Directory.SetCurrentDirectory(AppContext.BaseDirectory);
 
             Init();
