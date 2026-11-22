@@ -20,11 +20,15 @@ This fork is not affiliated with or endorsed by the WolvenKit or Omarchy teams. 
 
 ## What changed
 
-The Omarchy compatibility mode is enabled only when `WOLVENKIT_PROTON_COMPAT=1` is present in the Windows process environment. It leaves the normal rendering path unchanged without that opt-in.
+The Omarchy compatibility mode is enabled only when `WOLVENKIT_PROTON_COMPAT=1` is present in the Windows process environment. It leaves normal rendering and content-client defaults unchanged without that opt-in.
 
 The mode uses an opaque main window, software WPF composition, native swapchain presentation and a precomputed viewcube texture. It also hides native preview surfaces behind embedded dialogs and requests a fresh frame when those surfaces become visible again. WPF composition and the GPU scene renderer are separate parts of this setup.
 
 Other changes correct archive-import command notifications, handle canceled or empty file selections before any copy/delete, and add contextual render-error logging. The logging does not suppress exceptions or claim that a failed renderer loaded successfully.
+
+In-app binary update checks and installation are disabled in this downstream product, including the standalone Unpacker entrypoints. This policy applies regardless of compatibility flag, update channel or saved preferences. Reviewed portable builds can still be replaced manually outside the app.
+
+Script and template resource updates remain separate from binary updates. They validate and stage a replacement before changing the live cache, retain recovery data when rollback fails, and treat remote markers as opaque values. Exact compatibility mode adds bounded TCP address fallback for these content clients while preserving framework proxy negotiation, TLS/SNI and certificate validation. It does not pin CDN addresses or retry HTTP/TLS after a successful TCP connection.
 
 These source changes do not install fonts or Microsoft's shader compiler. The tested editor prefix also uses a native `d3dcompiler_47` override and Liberation font substitutes. Those prerequisites still need to be configured for a new installation.
 
@@ -40,6 +44,8 @@ Validation used one Omarchy/Hyprland setup with NVIDIA graphics, Steam Proton Ex
 - Regular and bold physical font resolution using substitutes.
 - GLB export, import into native Blender, mesh re-import and reopening.
 - Archive packing, byte-exact extraction and ZIP checks in a disposable project.
+- Live cold-cache and old-cache replacement startup for scripts and templates, compared file by file with independent HTTPS downloads.
+- The actual manual-only update dialog and focused service/dialog assertions under Windows CLR through Proton.
 
 The focused command, picker and renderer tests ran under Proton. The complete test project compiled, but the full repository suite was not executed. This is local validation, not a cross-distro certification or a long-session stability guarantee.
 
@@ -65,8 +71,9 @@ Check third-party dependency licenses before building or redistributing binaries
 
 ## Known limitations
 
-- Script and template update requests timed out in the tested environment.
+- Content fallback operates at TCP connection establishment. It does not retry a stalled HTTP/TLS exchange after TCP succeeds, and it is not a universal network repair.
 - Native viewport right-click menus did not open in the tested swapchain path.
+- Zoom to extents can reverse the view and crop geometry with the pinned camera-fit implementation. The fit calculation is under investigation. No speculative camera patch is included.
 - Fully textured materials, every entity/sector workflow, floating/docking and image export are not certified.
 - One earlier laboratory process exit remains unexplained. Later controlled runs closed normally, but they do not establish the cause of that exit.
 - Other GPU stacks, desktop sessions, Proton versions and Arch/Linux distributions remain untested.
@@ -75,7 +82,7 @@ Check third-party dependency licenses before building or redistributing binaries
 
 `origin` is this fork. `upstream` is the original WolvenKit repository. I fetch and review upstream changes on a separate branch, run the relevant tests, and merge only the changes I intend to maintain. There is no automatic upstream sync or merge policy.
 
-Inherited GitHub Actions remain disabled initially while their build, release and synchronization behavior is reviewed. Existing application update links and services still originate upstream, so do not use an upstream app replacement as a fork upgrade. It can remove the local compatibility changes.
+Inherited GitHub Actions remain disabled while their build, release and synchronization behavior is reviewed. In-app binary updates are manual-only. Review any external app replacement before using it as a fork upgrade, since an upstream portable build can remove the downstream changes.
 
 ## License
 
