@@ -15,5 +15,6 @@
 
     <ItemGroup>
         <PackageReference Include="System.CommandLine" />
+        <Compile Include="../WolvenKit.App/Services/ForkBinaryUpdatePolicy.cs" Link="ForkBinaryUpdatePolicy.cs" />
     </ItemGroup>
 </Project>

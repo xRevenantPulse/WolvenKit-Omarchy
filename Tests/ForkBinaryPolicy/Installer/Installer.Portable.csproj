@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <StartupObject>InstallerPolicyTests.Runner</StartupObject>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Runner.cs" />
+    <Compile Include="Tripwires.cs" />
+    <Compile Include="../../../WolvenKit.Unpacker/Program.cs" Link="Production/Program.cs" />
+    <Compile Include="../../../WolvenKit.App/Services/ForkBinaryUpdatePolicy.cs" Link="Production/ForkBinaryUpdatePolicy.cs" />
+    <PackageReference Include="System.CommandLine" />
+  </ItemGroup>
+</Project>

@@ -86,6 +86,12 @@ public partial class UpdateDialogViewModel : DialogViewModel
 
     private async Task InitializeState(bool skipPermissionStage = false, UpdateAvailability? updateAvailable = null)
     {
+        if (ForkBinaryUpdatePolicy.RequiresManualUpdates)
+        {
+            SetDialogToManualUpdatesState();
+            return;
+        }
+
         _latestVersionTag = await _updateService.GetLatestVersionTag();
         updateAvailable ??= await _updateService.IsUpdateAvailable();
 
@@ -113,8 +119,25 @@ public partial class UpdateDialogViewModel : DialogViewModel
         }
     }
 
+    private void SetDialogToManualUpdatesState()
+    {
+        NoUpdateAvailableState = true;
+        AskForPermissionState = false;
+        UpdateExecutingState = false;
+        ShowLoadingSpinner = false;
+        Title = ForkBinaryUpdatePolicy.Title;
+        Body = ForkBinaryUpdatePolicy.Message;
+        Buttons = new List<string>() { "OK" };
+    }
+
     public void SetDialogToNoUpdateAvailableState()
     {
+        if (ForkBinaryUpdatePolicy.RequiresManualUpdates)
+        {
+            SetDialogToManualUpdatesState();
+            return;
+        }
+
         NoUpdateAvailableState = true;
         AskForPermissionState = false;
         UpdateExecutingState = false;
@@ -126,6 +149,12 @@ public partial class UpdateDialogViewModel : DialogViewModel
 
     public async Task SetDialogToAskForPermissionState()
     {
+        if (ForkBinaryUpdatePolicy.RequiresManualUpdates)
+        {
+            SetDialogToManualUpdatesState();
+            return;
+        }
+
         NoUpdateAvailableState = false;
         AskForPermissionState = true;
         UpdateExecutingState = false;
@@ -144,6 +173,12 @@ public partial class UpdateDialogViewModel : DialogViewModel
 
     public void SetDialogToUpdateExecutingState()
     {
+        if (ForkBinaryUpdatePolicy.RequiresManualUpdates)
+        {
+            SetDialogToManualUpdatesState();
+            return;
+        }
+
         NoUpdateAvailableState = false;
         AskForPermissionState = false;
         UpdateExecutingState = true;

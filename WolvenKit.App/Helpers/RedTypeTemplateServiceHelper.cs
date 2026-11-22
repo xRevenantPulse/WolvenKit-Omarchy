@@ -15,7 +15,7 @@ namespace WolvenKit.App.Helpers;
 
 public static class RedTypeTemplateServiceHelper
 {
-    private static readonly HttpClient s_httpClient = new();
+    private static readonly HttpClient s_httpClient = ProtonHttpClientFactory.CreateHttpClient();
     private static readonly SemaphoreSlim s_updateLock = new(1, 1);
 
     /// <summary>
@@ -43,82 +43,31 @@ public static class RedTypeTemplateServiceHelper
     /// <remarks>Does not trigger the template service to load them from disk</remarks>
     public static async Task<bool> UpdateSystemTemplatesFromRemote(ILoggerService? loggerService = null)
     {
-        await s_updateLock.WaitAsync();
-        try
-        {
-            return await UpdateSystemTemplatesFromRemoteInternal(loggerService);
-        }
-        finally
-        {
-            s_updateLock.Release();
-        }
+        return await UpdateSystemTemplatesFromRemoteInternal(loggerService);
     }
 
     private static async Task<bool> UpdateSystemTemplatesFromRemoteInternal(ILoggerService? loggerService)
     {
-        // check remote version (no github API call)
-        var hashUrl = $@"https://wolvenkit.github.io/Wolvenkit-Resources/templatehash.txt";
-        var response = await s_httpClient.GetAsync(new Uri(hashUrl));
-
         try
         {
-            response.EnsureSuccessStatusCode();
+            await TransactionalContentUpdater.UpdateAsync(s_httpClient, AppDomain.CurrentDomain.BaseDirectory,
+                "Templates", "templatehash.txt",
+                new Uri("https://wolvenkit.github.io/Wolvenkit-Resources/templatehash.txt"),
+                new Uri("https://wolvenkit.github.io/Wolvenkit-Resources/templates.zip"),
+                s_updateLock, cleanupWarning: ex => loggerService?.Warning(ex.ToString()));
+            return true;
         }
-        catch (HttpRequestException ex)
+        catch (Exception ex) when (ex is HttpRequestException or OperationCanceledException or IOException or InvalidDataException or UnauthorizedAccessException)
         {
-            loggerService?.Error($"Failed to respond to url: {hashUrl}");
+            loggerService?.Warning("Template resource update failed; previous cache retained unless rollback recovery is reported.");
             loggerService?.Error(ex);
             return false;
         }
-
-        var localHash = "";
-        var resourcesDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources");
-        var templatesDir = new DirectoryInfo(Path.Combine(resourcesDir, "Templates"));
-        FileInfo hashPath = new(Path.Combine(resourcesDir, "templatehash.txt"));
-        if (hashPath.Exists)
+        catch (Exception ex)
         {
-            localHash = await File.ReadAllTextAsync(hashPath.FullName);
+            loggerService?.Error(ex);
+            throw;
         }
-
-        using var ms = new MemoryStream();
-        await response.Content.CopyToAsync(ms);
-        ms.Seek(0, SeekOrigin.Begin);
-        using var reader = new StreamReader(ms, Encoding.UTF8);
-        var remoteHash = await reader.ReadToEndAsync();
-        remoteHash = remoteHash.TrimEnd('\r', '\n');
-
-        if (localHash == remoteHash)
-        {
-            return true;
-        }
-
-        // clean
-        if (templatesDir.Exists)
-        {
-            templatesDir.Delete(true);
-        }
-        Directory.CreateDirectory(templatesDir.FullName);
-
-        // download zip file
-        var contentUrl = $@"https://wolvenkit.github.io/Wolvenkit-Resources/templates.zip";
-        response = await s_httpClient.GetAsync(new Uri(contentUrl));
-        try
-        {
-            response.EnsureSuccessStatusCode();
-        }
-        catch (HttpRequestException ex)
-        {
-            loggerService?.Warning($"Failed update scripts from {contentUrl}");
-            loggerService?.Warning($"\t{ex.Message}");
-            return false;
-        }
-
-        var zip = await response.Content.ReadAsStreamAsync();
-        zip.Seek(0, SeekOrigin.Begin);
-        ZipArchive zipArchive = new(zip);
-        zipArchive.ExtractToDirectory(templatesDir.FullName, true);
-
-        await File.WriteAllTextAsync(hashPath.FullName, remoteHash);
-        return true;
     }
+
 }

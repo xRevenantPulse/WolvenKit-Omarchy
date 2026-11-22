@@ -9,6 +9,13 @@ public class Program
 {
     public static async Task<int> Main(string[] args)
     {
+        // Fixed downstream product policy: deny before parsing or any installer effects.
+        if (WolvenKit.App.Services.ForkBinaryUpdatePolicy.RequiresManualUpdates)
+        {
+            Console.Error.WriteLine(WolvenKit.App.Services.ForkBinaryUpdatePolicy.Message);
+            return 1;
+        }
+
         var wolvenKitExePathOption = new Option<string>(
             aliases: new[] { "--wolvenkit-exe-path" },
             description: "Path to the WolvenKit.exe to be overwritten.") { IsRequired = true };
@@ -33,6 +40,8 @@ public class Program
     
     private static async Task UpdateWolvenKitExe(string wolvenKitExePath, string unzippedPath)
     {
+        WolvenKit.App.Services.ForkBinaryUpdatePolicy.EnsureInstallationAllowed();
+
         while (IsProcessRunningByPath(wolvenKitExePath))
         {
             await Task.Delay(100);
@@ -43,10 +52,16 @@ public class Program
         Environment.Exit(0);
     }
 
-    private static bool IsProcessRunningByPath(string path) => Process.GetProcessesByName(Path.GetFileNameWithoutExtension(path)).Any();
+    private static bool IsProcessRunningByPath(string path)
+    {
+        WolvenKit.App.Services.ForkBinaryUpdatePolicy.EnsureInstallationAllowed();
+        return Process.GetProcessesByName(Path.GetFileNameWithoutExtension(path)).Any();
+    }
 
     private static void MoveDirectoryWithOverwrite(string source, string destination)
     {
+        WolvenKit.App.Services.ForkBinaryUpdatePolicy.EnsureInstallationAllowed();
+
         if (!Directory.Exists(source))
         {
             throw new DirectoryNotFoundException($"Source directory '{source}' does not exist or could not be found.");

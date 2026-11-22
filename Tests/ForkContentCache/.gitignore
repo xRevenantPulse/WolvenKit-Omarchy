@@ -1,0 +1,6 @@
+bin/
+obj/
+runtime-temp/
+__pycache__/
+# Compatibility-lab SDK override is local only; published tests inherit the repository pin.
+global.json

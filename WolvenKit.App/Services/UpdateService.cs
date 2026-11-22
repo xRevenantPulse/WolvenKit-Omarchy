@@ -23,7 +23,7 @@ public class UpdateService : IUpdateService
     private readonly ISettingsManager _settingsManager;
     private readonly HttpClient _httpClient;
 
-    private readonly string _localChangelogPath = Path.Join(ISettingsManager.GetAppData(), "changelog.md");
+    private string _localChangelogPath => Path.Join(ISettingsManager.GetAppData(), "changelog.md");
     private const string s_remoteChangelogPath = "https://raw.githubusercontent.com/WolvenKit/WolvenKit/refs/heads/main/CHANGELOG.md";
 
     public UpdateService(ILoggerService loggerService, ISettingsManager settingsManager)
@@ -37,6 +37,8 @@ public class UpdateService : IUpdateService
 
     public async Task UpdateToNewestVersion()
     {
+        ForkBinaryUpdatePolicy.EnsureInstallationAllowed();
+
         var latestRelease = await GetLatestRelease();
         if (latestRelease is null)
         {
@@ -146,6 +148,12 @@ public class UpdateService : IUpdateService
 
     public async Task<UpdateAvailability> IsUpdateAvailable(MinimalGithubRelease? release = null)
     {
+        // None means no in-app install is offered, not a claim that this fork is current.
+        if (ForkBinaryUpdatePolicy.RequiresManualUpdates)
+        {
+            return UpdateAvailability.None;
+        }
+
         if (DesktopBridgeHelper.IsRunningAsPackage())
         {
             return UpdateAvailability.None;
@@ -185,6 +193,8 @@ public class UpdateService : IUpdateService
 
     public async Task<string> GetLatestVersionTag()
     {
+        ForkBinaryUpdatePolicy.EnsureInstallationAllowed();
+
         var latestRelease = await GetLatestRelease();
         return latestRelease?.TagName ?? "0.0.0";
     }
@@ -211,6 +221,8 @@ public class UpdateService : IUpdateService
 
     private async Task<MinimalGithubRelease?> GetLatestRelease()
     {
+        ForkBinaryUpdatePolicy.EnsureInstallationAllowed();
+
         try
         {
             var response =
@@ -239,6 +251,11 @@ public class UpdateService : IUpdateService
 
     public async Task<string?> GetRemoteChangelog(string localVersion, string remoteVersion)
     {
+        if (ForkBinaryUpdatePolicy.RequiresManualUpdates)
+        {
+            return null;
+        }
+
         if (remoteVersion.Contains("nightly"))
         {
             // nightly doesn't have changelogs

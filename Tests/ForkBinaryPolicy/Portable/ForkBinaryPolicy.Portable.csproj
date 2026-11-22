@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable></PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../../WolvenKit.App/Services/UpdateService.cs" Link="Production/UpdateService.cs" />
+    <Compile Include="../../../WolvenKit.App/Services/IUpdateService.cs" Link="Production/IUpdateService.cs" />
+    <Compile Include="../../../WolvenKit.App/Services/ForkBinaryUpdatePolicy.cs" Link="Production/ForkBinaryUpdatePolicy.cs" Condition="Exists('../../../WolvenKit.App/Services/ForkBinaryUpdatePolicy.cs')" />
+    <Compile Include="../../../WolvenKit.App/Models/MinimalGithubRelease.cs" Link="Production/MinimalGithubRelease.cs" />
+    <Compile Include="../../../WolvenKit.App/ViewModels/Dialogs/UpdateDialogViewModel.cs" Link="Production/UpdateDialogViewModel.cs" />
+    <PackageReference Include="semver" />
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="Newtonsoft.Json" VersionOverride="13.0.3" />
+  </ItemGroup>
+</Project>
